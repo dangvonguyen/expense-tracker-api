@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated, Generator
 
 import jwt
@@ -31,7 +32,8 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         token_data = TokenPayload(**payload)
     except InvalidTokenError:
         raise HTTPException(status_code=403, detail="Could not validate credentials")
-    user = session.get(User, token_data.sub)
+    user_id = uuid.UUID(token_data.sub)
+    user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
