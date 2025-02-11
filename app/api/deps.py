@@ -11,7 +11,7 @@ from app.config import settings
 from app.db import engine
 from app.models import TokenPayload, User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/access-token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/signin/access-token")
 
 
 def get_db() -> Generator[Session, None, None]:
