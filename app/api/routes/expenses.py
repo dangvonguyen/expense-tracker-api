@@ -1,14 +1,16 @@
 import uuid
-from typing import Any
+from datetime import datetime, timedelta
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from fastapi import APIRouter, HTTPException, Query
+from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.cruds import expense_crud
 from app.models import (
     Expense,
     ExpenseCreate,
+    ExpenseFilter,
     ExpensePublic,
     ExpensesPublic,
     ExpenseUpdate,
@@ -20,21 +22,44 @@ router = APIRouter(prefix="/expenses", tags=["expenses"])
 
 @router.get("/", response_model=ExpensesPublic)
 def read_expenses(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    queries: Annotated[ExpenseFilter, Query()],
 ) -> Any:
-    count_statement = (
-        select(func.count())
-        .select_from(Expense)
-        .where(Expense.owner_id == current_user.id)
-    )
-    count = session.exec(count_statement).one()
-    print(count)
     statement = (
         select(Expense)
         .where(Expense.owner_id == current_user.id)
-        .offset(skip)
-        .limit(limit)
+        .where(col(Expense.category).in_(queries.categories))
     )
+    if queries.period and queries.n_periods:
+        date_threshold = datetime.now() - timedelta(
+            days=queries.n_periods * queries.period.get_days()
+        )
+        statement = statement.where(Expense.created_at >= date_threshold)
+    elif queries.start_date and queries.end_date:
+        if queries.start_date > queries.end_date:
+            raise HTTPException(
+                status_code=400, detail="Start date must be before end date"
+            )
+        statement = statement.where(
+            Expense.created_at >= queries.start_date,
+            Expense.created_at <= queries.end_date,
+        )
+
+    # Get total count before pagination
+    count_statement = select(func.count()).select_from(statement)
+    count = session.exec(count_statement).one()
+
+    # Apply sorting
+    sort_column = col(getattr(Expense, queries.order_by))
+    if queries.sort_order == "desc":
+        statement = statement.order_by(sort_column.desc())
+    else:
+        statement = statement.order_by(sort_column.asc())
+
+    # Apply pagination
+    statement = statement.offset(queries.skip).limit(queries.limit)
+
     expenses = session.exec(statement).all()
     return ExpensesPublic(data=expenses, count=count)
 

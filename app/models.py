@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.enums import ExpenseCategory
+from app.enums import ExpenseCategory, TimePeriod
 
 
 class BaseUser(SQLModel):
@@ -71,6 +72,20 @@ class Expense(ExpenseBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User = Relationship(back_populates="expenses")
+
+
+class ExpenseFilter(BaseModel):
+    skip: int = 0
+    limit: int = 100
+    period: TimePeriod | None = None
+    n_periods: int | None = Field(default=None, gt=0)
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    order_by: Literal["amount", "created_at", "updated_at"] = "created_at"
+    sort_order: Literal["asc", "desc"] = "asc"
+    categories: list[ExpenseCategory] = Field(
+        default_factory=lambda: list(ExpenseCategory)
+    )
 
 
 class Token(BaseModel):
