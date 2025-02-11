@@ -1,7 +1,10 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+from app.enums import ExpenseCategory
 
 
 class BaseUser(SQLModel):
@@ -25,6 +28,49 @@ class UserPublic(BaseUser):
 class User(BaseUser, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
+    expenses: list["Expense"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
+
+
+class ExpenseBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=511)
+    amount: float = Field(gt=0)
+    category: ExpenseCategory
+
+
+class ExpenseUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=511)
+    amount: float | None = Field(default=None, gt=0)
+    category: ExpenseCategory | None = None
+
+
+class ExpenseCreate(ExpenseBase):
+    pass
+
+
+class ExpensePublic(ExpenseBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class ExpensesPublic(SQLModel):
+    data: list[ExpensePublic]
+    count: int
+
+
+class Expense(ExpenseBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime
+    updated_at: datetime
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    owner: User = Relationship(back_populates="expenses")
 
 
 class Token(BaseModel):
@@ -34,3 +80,7 @@ class Token(BaseModel):
 
 class TokenPayload(BaseModel):
     sub: str
+
+
+class Message(BaseModel):
+    message: str

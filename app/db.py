@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, create_engine
 
-from app.models import User  # noqa: F401
+from app.models import User, Expense  # noqa: F401
 
 
 sql_file_name = "database.db"
