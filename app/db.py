@@ -1,12 +1,9 @@
 from sqlmodel import SQLModel, create_engine
 
-from app.models import User, Expense  # noqa: F401
+from app.config import settings
+from app.models import Expense, User  # noqa: F401
 
-
-sql_file_name = "database.db"
-sql_url = f"sqlite:///{sql_file_name}"
-
-engine = create_engine(sql_url)
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
 
 
 def init_db() -> None:
