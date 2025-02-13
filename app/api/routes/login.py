@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import SessionDep
 from app.config import settings
 from app.cruds import user_crud
-from app.models import Token, UserPublic, UserRegister, UserCreate
+from app.models import Token, UserCreate, UserPublic, UserRegister
 from app.security import create_access_token
 
 router = APIRouter(tags=["login"])

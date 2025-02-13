@@ -1,5 +1,6 @@
 import uuid
-from typing import Annotated, Generator
+from collections.abc import Generator
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException
@@ -12,7 +13,9 @@ from app.config import settings
 from app.db import engine
 from app.models import TokenPayload, User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/signin/access-token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/signin/access-token"
+)
 
 
 def get_db() -> Generator[Session, None, None]:

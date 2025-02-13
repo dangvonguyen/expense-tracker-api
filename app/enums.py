@@ -12,12 +12,14 @@ class ExpenseCategory(str, Enum):
 
 
 class TimePeriod(str, Enum):
+    _days: int
+
     DAY = ("day", 1)
     WEEK = ("week", 7)
     MONTH = ("month", 30)
     YEAR = ("year", 365)
 
-    def __new__(cls, value: str, days: int):
+    def __new__(cls, value: str, days: int) -> "TimePeriod":
         instance = super().__new__(cls)
         instance._value_ = value
         instance._days = days

@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SQLITE_FILE_NAME: str
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> str:
+    def SQLALCHEMY_DATABASE_URI(self) -> str:  # noqa: N802
         return f"sqlite:///{self.SQLITE_FILE_NAME}"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore

@@ -47,7 +47,7 @@ def read_expenses(
         )
 
     # Get total count before pagination
-    count_statement = select(func.count()).select_from(statement)
+    count_statement = select(func.count()).select_from(statement.subquery())
     count = session.exec(count_statement).one()
 
     # Apply sorting
