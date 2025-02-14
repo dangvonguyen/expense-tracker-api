@@ -42,12 +42,13 @@ def read_expenses(
                 status_code=400, detail="Start date must be before end date"
             )
         statement = statement.where(
-            Expense.created_at >= queries.start_date,
-            Expense.created_at <= queries.end_date,
+            col(Expense.created_at).between(queries.start_date, queries.end_date)
         )
 
     # Get total count before pagination
-    count_statement = select(func.count()).select_from(statement.subquery())
+    count_statement = statement.with_only_columns(
+        [func.count()], maintain_column_froms=True
+    )
     count = session.exec(count_statement).one()
 
     # Apply sorting
