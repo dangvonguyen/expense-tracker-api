@@ -47,9 +47,9 @@ def read_expenses(
 
     # Get total count before pagination
     count_statement = statement.with_only_columns(
-        [func.count()], maintain_column_froms=True
+        func.count(), maintain_column_froms=True
     )
-    count = session.exec(count_statement).one()
+    count = session.scalar(count_statement)
 
     # Apply sorting
     sort_column = col(getattr(Expense, queries.order_by))
