@@ -1,8 +1,11 @@
-from app.db import init_db
+from sqlmodel import Session
+
+from app.db import engine, init_db
 
 
 def main() -> None:
-    init_db()
+    with Session(engine) as session:
+        init_db(session)
 
 
 if __name__ == "__main__":

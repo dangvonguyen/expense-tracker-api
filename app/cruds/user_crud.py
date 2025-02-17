@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlmodel import Session, select
 
 from app.models import User, UserCreate
@@ -12,6 +14,19 @@ def create(*, session: Session, user_create: UserCreate) -> User:
     session.commit()
     session.refresh(db_user)
     return db_user
+
+
+def update(*, session: Session, db_user: User, new_data: dict[str, Any]) -> User:
+    db_user.sqlmodel_update(new_data)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
+
+
+def delete(*, session: Session, user_in: User) -> None:
+    session.delete(user_in)
+    session.commit()
 
 
 def get_by_email(*, session: Session, email: str) -> User | None:

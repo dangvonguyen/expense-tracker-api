@@ -1,6 +1,6 @@
 import secrets
 
-from pydantic import computed_field
+from pydantic import EmailStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:  # noqa: N802
         return f"sqlite:///{self.SQLITE_FILE_NAME}"
+
+    ROOT_USER_EMAIL: EmailStr
+    ROOT_USER_PASSWORD: str
 
 
 settings = Settings()  # type: ignore

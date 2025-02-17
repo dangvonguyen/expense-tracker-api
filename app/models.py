@@ -11,6 +11,8 @@ from app.enums import ExpenseCategory, TimePeriod
 class BaseUser(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
+    is_superuser: bool = False
+    is_root: bool = False
 
 
 class UserCreate(BaseUser):
@@ -24,6 +26,26 @@ class UserRegister(SQLModel):
 
 class UserPublic(BaseUser):
     id: uuid.UUID
+
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int
+
+
+class UserUpdateStatus(SQLModel):
+    is_active: bool | None = Field(default=None)
+    is_superuser: bool | None = Field(default=None)
+    is_root: bool | None = Field(default=None)
+
+
+class UserUpdateMe(SQLModel):
+    email: EmailStr | None = Field(default=None, max_length=255)
+
+
+class UpdatePassword(BaseModel):
+    current_password: str = Field(min_length=8, max_length=40)
+    new_password: str = Field(min_length=8, max_length=40)
 
 
 class User(BaseUser, table=True):
