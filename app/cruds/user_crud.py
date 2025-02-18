@@ -16,7 +16,16 @@ def create(*, session: Session, user_create: UserCreate) -> User:
     return db_user
 
 
-def update(*, session: Session, db_user: User, new_data: dict[str, Any]) -> User:
+def update(
+    *, session: Session, db_user: User, new_data: dict[str, Any] | BaseModel
+) -> User:
+    if isinstance(new_data, BaseModel):
+        new_data = new_data.model_dump(exclude_unset=True)
+    if new_data.get("is_root") is True:
+        new_data["is_superuser"] = True
+    if new_data.get("password"):
+        new_data["hashed_password"] = get_password_hash(new_data["password"])
+
     db_user.sqlmodel_update(new_data)
     session.add(db_user)
     session.commit()

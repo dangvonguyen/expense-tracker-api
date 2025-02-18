@@ -21,7 +21,7 @@ from app.models import (
     UserUpdateMe,
     UserUpdateStatus,
 )
-from app.security import get_password_hash, verify_password
+from app.security import verify_password
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -73,9 +73,8 @@ async def update_user_me(
             raise HTTPException(
                 status_code=409, detail="The email is already used with an account"
             )
-    user_data = user_in.model_dump(exclude_unset=True)
     updated_user = user_crud.update(
-        session=session, db_user=current_user, new_data=user_data
+        session=session, db_user=current_user, new_data=user_in
     )
     return updated_user
 
@@ -90,11 +89,8 @@ async def update_password_me(
         raise HTTPException(
             status_code=400, detail="New password must differ from the current one"
         )
-    hashed_password = get_password_hash(body.new_password)
     user_crud.update(
-        session=session,
-        db_user=current_user,
-        new_data={"hashed_password": hashed_password},
+        session=session, db_user=current_user, new_data={"password": body.new_password}
     )
     return Message(message="Password updated successfully")
 
@@ -135,10 +131,9 @@ async def update_user_status(
         raise HTTPException(
             status_code=403, detail="The superuser doesn't have enough privileges"
         )
-    if user_status_in.is_root:
-        user_status_in.is_superuser = True
-    user_data = user_status_in.model_dump(exclude_unset=True)
-    updated_user = user_crud.update(session=session, db_user=user, new_data=user_data)
+    updated_user = user_crud.update(
+        session=session, db_user=user, new_data=user_status_in
+    )
     return updated_user
 
 
