@@ -26,11 +26,12 @@ def read_expenses(
     current_user: CurrentUser,
     queries: Annotated[ExpenseFilter, Query()],
 ) -> Any:
-    statement = (
-        select(Expense)
-        .where(Expense.owner_id == current_user.id)
-        .where(col(Expense.category).in_(queries.categories))
-    )
+    if current_user.is_superuser:
+        statement = select(Expense)
+    else:
+        statement = select(Expense).where(Expense.owner_id == current_user.id)
+
+    statement = statement.where(col(Expense.category).in_(queries.categories))
     if queries.period and queries.n_periods:
         date_threshold = datetime.now() - timedelta(
             days=queries.n_periods * queries.period.get_days()
@@ -114,6 +115,5 @@ def delete_expense(
         raise HTTPException(status_code=404, detail="Expense not found")
     if expense.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    session.delete(expense)
-    session.commit()
+    expense_crud.delete(session=session, expense_in=expense)
     return Message(message="Expense deleted successfully")

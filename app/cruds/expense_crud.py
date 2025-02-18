@@ -25,3 +25,8 @@ def update(
     session.commit()
     session.refresh(db_expense)
     return db_expense
+
+
+def delete(*, session: Session, expense_in: Expense) -> None:
+    session.delete(expense_in)
+    session.commit()
