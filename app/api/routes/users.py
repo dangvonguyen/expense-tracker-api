@@ -69,7 +69,7 @@ async def update_user_me(
 ) -> Any:
     if user_in.email:
         user = user_crud.get_by_email(session=session, email=user_in.email)
-        if user and user.email != current_user.email:
+        if user:
             raise HTTPException(
                 status_code=409, detail="The email is already used with an account"
             )

@@ -1,5 +1,6 @@
 from typing import Any
 
+from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.models import User, UserCreate
@@ -7,9 +8,10 @@ from app.security import get_password_hash, verify_password
 
 
 def create(*, session: Session, user_create: UserCreate) -> User:
-    db_user = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
-    )
+    extra: dict[str, Any] = {"hashed_password": get_password_hash(user_create.password)}
+    if user_create.is_root:
+        extra["is_superuser"] = True
+    db_user = User.model_validate(user_create, update=extra)
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
