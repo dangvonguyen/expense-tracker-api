@@ -1,6 +1,6 @@
 import secrets
 
-from pydantic import EmailStr, computed_field
+from pydantic import EmailStr, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,12 +15,23 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
     PROJECT_NAME: str
-    SQLITE_FILE_NAME: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: int
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> str:  # noqa: N802
-        return f"sqlite:///{self.SQLITE_FILE_NAME}"
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:  # noqa: N802
+        return PostgresDsn.build(
+            scheme="postgresql+psycopg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
 
     ROOT_USER_EMAIL: EmailStr
     ROOT_USER_PASSWORD: str

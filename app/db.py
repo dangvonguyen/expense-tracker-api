@@ -4,7 +4,7 @@ from app.config import settings
 from app.cruds import user_crud
 from app.models import User, UserCreate
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 
 def init_db(session: Session) -> None:
