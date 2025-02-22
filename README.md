@@ -18,30 +18,14 @@ $ git clone https://github.com/dangvonguyen/expense-tracker-api.git
 $ cd expense-tracker-api
 ```
 
-2. Install dependencies using `uv`:
+2. Update the environment values in `.env` as needed:
+
+## Usage with Docker
+
+1. Build and start the application:
 
 ```bash
-$ uv sync
-```
-
-3. Activate the virtual environment:
-
-```bash
-$ source .venv/bin/activate
-```
-
-4. Initialize the database:
-
-```bash
-$ bash ./scripts/prestart.sh
-```
-
-## Usage
-
-1. Start the FastAPI server:
-
-```bash
-$ fastapi run app/main.py
+$ docker compose up --build
 ```
 
 2. The API will be available at `http://localhost:8000`
